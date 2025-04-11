@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Управление заказами</h1>
+        {% if is_admin or user_role == 'dispatcher' %}
+        <a href="{% url 'order_create' %}" class="btn btn-success">+ Новый заказ</a>
+        {% endif %}
+    </div>
+    
+    <!-- Поиск и сортировка -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" 
+                           class="form-control" 
+                           name="search" 
+                           placeholder="Поиск по телефону..."
+                           value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group">
+                <a href="?sort={% if current_sort == 'created_at' %}-{% endif %}created_at" 
+                   class="btn btn-outline-secondary {% if current_sort in 'created_at -created_at' %}active{% endif %}">
+                    Дата {% if current_sort == '-created_at' %}↓{% else %}↑{% endif %}
+                </a>
+                <a href="?sort={% if current_sort == 'status' %}-{% endif %}status" 
+                   class="btn btn-outline-secondary {% if current_sort in 'status -status' %}active{% endif %}">
+                    Статус {% if current_sort == '-status' %}↓{% else %}↑{% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица заказов -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>№</th>
+                    <th>Клиент</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Сумма</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr class="order-row" 
+                    data-bs-toggle="tooltip" 
+                    data-bs-html="true" 
+                    title="<b>Блюда:</b><br>{% for item in order.orderdish_set.all %}- {{ item.dish.name }} ({{ item.quantity }})<br>{% endfor %}<b>Примечания:</b> {{ order.notes|default:'нет' }}">
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.client.name }}<br><small>{{ order.client.phone }}</small></td>
+                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <span class="badge bg-{{ order.get_status_color }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ order.total }} ₽</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'edit_order' order.id %}" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'delete_order' order.id %}" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Нет заказов</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Активация всплывающих подсказок
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                boundary: 'window',
+                customClass: 'custom-tooltip'
+            })
+        })
+    })
+</script>
+
+<style>
+    .order-row:hover {
+        background-color: #f8f9fa;
+        cursor: help;
+    }
+    
+    .custom-tooltip .tooltip-inner {
+        max-width: 400px;
+        text-align: left;
+        background: white;
+        color: #333;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    }
+    
+    .custom-tooltip .tooltip-arrow {
+        display: none;
+    }
+</style>
+{% endblock %}

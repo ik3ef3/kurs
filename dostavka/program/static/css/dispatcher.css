@@ -1,0 +1,46 @@
+/* static/css/dispatcher.css */
+.menu-sidebar {
+    position: fixed;
+    right: 20px;
+    top: 100px;
+    width: 300px;
+    background: #f8f9fa;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.dish-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.price-display {
+    color: #28a745;
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+.badge-new { background-color: #6c757d!important; }
+.badge-preparing { background-color: #ffc107!important; color: #000!important; }
+.badge-delivered { background-color: #28a745!important; }
+
+.badge-pill {
+    font-size: 0.9em;
+    padding: 0.5em 0.75em;
+    border-radius: 10rem;
+}
+
+.popover {
+    max-width: 400px;
+}
+.popover img {
+    max-height: 200px;
+    object-fit: cover;
+}

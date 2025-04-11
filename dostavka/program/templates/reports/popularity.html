@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Популярность блюд</h2>
+    
+    <!-- Фильтр -->
+    <form method="get" class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label>Начальная дата</label>
+                <input type="date" name="start_date" class="form-control" 
+                       value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label>Конечная дата</label>
+                <input type="date" name="end_date" class="form-control" 
+                       value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Применить</button>
+                <a href="?export=1" class="btn btn-success">Excel</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Таблица -->
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Блюдо</th>
+                <th>Количество</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dish in dishes %}
+            <tr>
+                <td>{{ dish.name }}</td>
+                <td>{{ dish.total_ordered|default:0 }}</td>
+                <td>{{ dish.price }} ₽</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Нет данных</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">📈 Отчётность</h1>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- Карточка популярности -->
+        <div class="col">
+            <a href="{% url 'popularity_report' %}" class="card h-100 text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-bar-chart-fill fs-1 text-primary"></i>
+                    </div>
+                    <h3 class="card-title">Популярность блюд</h3>
+                    <p class="text-muted">Анализ востребованности меню</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка требований -->
+        <div class="col">
+            <a href="{% url 'requirements_report' %}" class="card h-100 text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-cart-check-fill fs-1 text-success"></i>
+                    </div>
+                    <h3 class="card-title">Требования на продукты</h3>
+                    <p class="text-muted">План закупки ингредиентов</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка прибыли -->
+        <div class="col">
+            <a href="{% url 'profit_report' %}" class="card h-100 text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-cash-coin fs-1 text-warning"></i>
+                    </div>
+                    <h3 class="card-title">Финансовая отчётность</h3>
+                    <p class="text-muted">Анализ доходов и расходов</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

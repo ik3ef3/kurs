@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded-lg">
+    <h1 class="display-4">Добро пожаловать!</h1>
+    <p class="lead">Система автоматизации доставки обедов в офисы</p>
+    <hr class="my-4">
+    <p>Используйте навигационное меню для работы с системой</p>
+    
+    {% if not user.is_authenticated %}
+    <div class="alert alert-info">
+        Для продолжения работы необходимо авторизоваться
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

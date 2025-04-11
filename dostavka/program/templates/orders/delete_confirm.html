@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Удаление заказа #{{ order.id }}</h2>
+    <div class="alert alert-danger">
+        Вы уверены, что хотите удалить заказ от {{ order.client.name }} ({{ order.created_at|date:"d.m.Y H:i" }})?
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="{% url 'order_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

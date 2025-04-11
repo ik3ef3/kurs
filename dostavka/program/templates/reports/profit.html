@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Финансовая отчётность</h2>
+    
+    <!-- Фильтр (аналогичный) -->
+    <form method="get" class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label>Начальная дата</label>
+                <input type="date" name="start_date" class="form-control"
+                       value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label>Конечная дата</label>
+                <input type="date" name="end_date" class="form-control"
+                       value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Применить</button>
+                <a href="?export=1" class="btn btn-success">Excel</a>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Карточки -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Выручка</h5>
+                    <p class="card-text fs-2">{{ revenue }} ₽</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Затраты</h5>
+                    <p class="card-text fs-2">{{ costs }} ₽</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Прибыль</h5>
+                    <p class="card-text fs-2">{{ profit }} ₽</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

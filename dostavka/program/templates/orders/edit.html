@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Редактирование заказа #{{ order.id }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Блок клиента (только для просмотра) -->
+        <div class="card mb-4 shadow">
+            <div class="card-header">Данные клиента</div>
+            <div class="card-body">
+                <input type="hidden" name="client_id" value="{{ order.client.id }}">
+                <dl class="row">
+                    <dt class="col-sm-3">Телефон</dt>
+                    <dd class="col-sm-9">{{ order.client.phone }}</dd>
+                    
+                    <dt class="col-sm-3">Имя</dt>
+                    <dd class="col-sm-9">{{ order.client.name }}</dd>
+                    
+                    <dt class="col-sm-3">Адрес</dt>
+                    <dd class="col-sm-9">{{ order.client.address }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Блок статуса -->
+        <div class="card mb-4 shadow">
+            <div class="card-header">Статус заказа</div>
+            <div class="card-body">
+                <select name="status" class="form-select">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}"
+                            {% if order.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Блок блюд -->
+        <div class="card mb-4 shadow">
+            <div class="card-header">Состав заказа</div>
+            <div class="card-body">
+                <div id="dishes-container">
+                    {% for item in order.orderdish_set.all %}
+                    <div class="dish-row row g-3 mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select" name="dish_{{ forloop.counter0 }}">
+                                <option value="">Выберите блюдо</option>
+                                {% for dish in dishes %}
+                                <option value="{{ dish.id }}" {% if dish.id == item.dish.id %}selected{% endif %}>
+                                    {{ dish.name }} ({{ dish.price }}₽)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="quantity_{{ forloop.counter0 }}" 
+                                   min="1" 
+                                   value="{{ item.quantity }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger w-100" onclick="removeDish(this)">×</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-secondary mt-3" onclick="addDishField()">+ Добавить блюдо</button>
+            </div>
+        </div>
+
+        <!-- Примечания -->
+        <div class="mb-4">
+            {{ form.notes.label_tag }}
+            {{ form.notes }}
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<!-- Добавьте JavaScript из create.html -->
+<script>
+    let dishCounter = {{ order.orderdish_set.count }};
+
+    function addDishField() {
+        const container = document.getElementById('dishes-container');
+        const newRow = container.lastElementChild.cloneNode(true);
+
+        // Обновляем имена полей
+        const inputs = newRow.querySelectorAll('select, input');
+        inputs.forEach(input => {
+            const name = input.name.split('_')[0] + '_' + dishCounter;
+            input.name = name;
+            input.value = '';
+        });
+
+        container.appendChild(newRow);
+        dishCounter++;
+    }
+
+    function removeDish(btn) {
+        const row = btn.closest('.dish-row');
+        if (document.querySelectorAll('.dish-row').length > 1) {
+            row.remove();
+        }
+    }
+    document.querySelectorAll('.dish-select, input[type="number"]').forEach(el => {
+    el.addEventListener('change', updateTotal);
+    });
+
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('.dish-row').forEach(row => {
+            const price = parseFloat(row.querySelector('option:checked').dataset.price || 0);
+            const quantity = parseInt(row.querySelector('input').value || 0);
+            total += price * quantity;
+        });
+        document.getElementById('total-preview').textContent = total.toFixed(2) + ' ₽';
+    }
+</script>
+{% endblock %}

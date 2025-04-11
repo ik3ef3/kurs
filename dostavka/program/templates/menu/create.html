@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Создание нового меню</h2>
+    
+    <form method="post" id="menu-form">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {{ form.date.label_tag }}
+            {{ form.date }}
+        </div>
+        
+        <div id="dishes-container">
+            <div class="dish-group mb-3">
+                {{ form.dishes.label_tag }}
+                {{ form.dishes }}
+            </div>
+        </div>
+        
+        <button type="button" class="btn btn-secondary mb-3" onclick="addDishField()">
+            + Добавить блюдо
+        </button>
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Сохранить меню</button>
+            <a href="{% url 'menu_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function addDishField() {
+        const container = document.getElementById('dishes-container');
+        const newField = container.firstElementChild.cloneNode(true);
+        newField.querySelector('select').selectedIndex = -1;
+        container.appendChild(newField);
+    }
+</script>
+
+<style>
+    .dish-group {
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}

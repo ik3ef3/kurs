@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Создание нового заказа</h2>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post" id="order-form">
+        {% csrf_token %}
+        
+        <!-- Блок клиента -->
+        <div class="card mb-4 shadow">
+            <div class="card-header">Данные клиента</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Телефон*</label>
+                        <input type="tel" 
+                               class="form-control" 
+                               name="client_phone"
+                               id="client-phone"
+                               required>
+                        <div id="client-suggestions" class="list-group mt-2"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Имя</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="client_name"
+                               id="client-name">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Адрес</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="client_address"
+                               id="client-address">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок блюд -->
+        <div class="card mb-4 shadow">
+            <div class="card-header">Состав заказа</div>
+            <div class="card-body">
+                <div id="dishes-container">
+                    <div class="dish-row row g-3 mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select dish-select" name="dish_0">
+                                <option value="">Выберите блюдо</option>
+                                {% for dish in dishes %}
+                                <option value="{{ dish.id }}">{{ dish.name }} ({{ dish.price }}₽)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="quantity_0" 
+                                   min="1" 
+                                   value="1">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" 
+                                    class="btn btn-danger w-100" 
+                                    onclick="removeDish(this)">×</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn btn-secondary mt-3" 
+                        onclick="addDishField()">+ Добавить блюдо</button>
+            </div>
+        </div>
+
+        <!-- Примечания -->
+        <div class="mb-4">
+            {{ form.notes.label_tag }}
+            {{ form.notes }}
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Сохранить заказ</button>
+            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Автодополнение телефона
+    const phoneInput = document.getElementById('client-phone');
+    const suggestions = document.getElementById('client-suggestions');
+
+    phoneInput.addEventListener('input', function(e) {
+        const phone = e.target.value;
+        if(phone.length < 3) {
+            suggestions.classList.remove('show');
+            return;
+        }
+
+        fetch(`/autocomplete/client/?term=${encodeURIComponent(phone)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+
+                data.forEach(client => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `
+                        <strong>${client.phone}</strong><br>
+                        <small>${client.name}</small>
+                    `;
+                    item.onclick = () => {
+                        fillClientData(client);
+                        suggestions.classList.remove('show');
+                    };
+                    suggestions.appendChild(item);
+                });
+
+                if(data.length > 0) {
+                    suggestions.classList.add('show');
+                }
+            });
+    });
+
+    // Скрытие списка при потере фокуса
+    phoneInput.addEventListener('blur', function() {
+        setTimeout(() => suggestions.classList.remove('show'), 200);
+    });
+
+    // Скрытие при клике вне области
+    document.addEventListener('click', function(e) {
+        if(!phoneInput.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.classList.remove('show');
+        }
+    });
+</script>
+
+<script>
+    let dishCounter = 1;
+    
+    function addDishField() {
+        const container = document.getElementById('dishes-container');
+        const newRow = container.firstElementChild.cloneNode(true);
+        
+        // Обновляем имена полей
+        const inputs = newRow.querySelectorAll('select, input');
+        inputs.forEach(input => {
+            const name = input.name.split('_')[0] + '_' + dishCounter;
+            input.name = name;
+            input.value = '';
+        });
+        
+        container.appendChild(newRow);
+        dishCounter++;
+    }
+
+    function removeDish(btn) {
+        if(document.querySelectorAll('.dish-row').length > 1) {
+            btn.closest('.dish-row').remove();
+        }
+    }
+
+    // Автодополнение телефона
+    document.getElementById('client-phone').addEventListener('input', function(e) {
+        const phone = e.target.value;
+        if(phone.length < 3) return;
+        
+        fetch(`/autocomplete/client/?term=${encodeURIComponent(phone)}`)
+            .then(response => response.json())
+            .then(data => {
+                const suggestions = document.getElementById('client-suggestions');
+                suggestions.innerHTML = '';
+                
+                data.forEach(client => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `
+                        <strong>${client.phone}</strong><br>
+                        <small>${client.name}</small>
+                    `;
+                    item.onclick = () => fillClientData(client);
+                    suggestions.appendChild(item);
+                });
+            });
+    });
+
+    function fillClientData(client) {
+    document.getElementById('client-phone').value = client.phone;
+    document.getElementById('client-name').value = client.name;
+    document.getElementById('client-address').value = client.address || '';
+    suggestions.classList.remove('show');
+}
+document.querySelectorAll('.dish-select, input[type="number"]').forEach(el => {
+    el.addEventListener('change', updateTotal);
+});
+
+function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.dish-row').forEach(row => {
+        const price = parseFloat(row.querySelector('option:checked').dataset.price || 0);
+        const quantity = parseInt(row.querySelector('input').value || 0);
+        total += price * quantity;
+    });
+    document.getElementById('total-preview').textContent = total.toFixed(2) + ' ₽';
+}
+</script>
+
+<style>
+    .dish-row {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1rem;
+    }
+    #client-suggestions {
+        position: absolute;
+        z-index: 1000;
+        width: calc(100% - 30px);
+    }
+    .list-group-item-action {
+        cursor: pointer;
+    }
+    #client-suggestions {
+        display: none; /* Скрываем по умолчанию */
+    }
+
+    #client-suggestions.show {
+        display: block;
+    }
+</style>
+{% endblock %}

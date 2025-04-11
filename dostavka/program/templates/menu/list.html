@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="my-4">Меню</h1>
+        {% if is_admin or user_role == 'manager' %}
+        <a href="{% url 'menu_create' %}" class="btn btn-success">
+            + Создать меню
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Сетка меню -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for menu in menus %}
+        <div class="col">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">{{ menu.date }}</h5>
+                </div>
+                
+                <div class="card-body">
+                    <div class="dish-grid">
+                        {% for dish in menu.dishes.all %}
+                        <div class="dish-item position-relative">
+                            <div class="dish-main">
+                                {{ dish.name }}
+                            </div>
+                            
+                            <!-- Всплывающая информация -->
+                            <div class="dish-details">
+                                {% if dish.image %}
+                                <img src="{{ dish.image.url }}" 
+                                     alt="{{ dish.name }}" 
+                                     class="img-fluid mb-2">
+                                {% endif %}
+                                
+                                <p class="small">{{ dish.description }}</p>
+                                
+                                <div class="ingredients-list">
+                                    <h6>Ингредиенты:</h6>
+                                    <ul class="list-unstyled">
+                                        {% for di in dish.dishingredient_set.all %}
+                                        <li>
+                                            {{ di.ingredient.name }} 
+                                            - {{ di.quantity }} {{ di.ingredient.unit }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .dish-grid {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .dish-item {
+        padding: 0.5rem;
+        border-radius: 5px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .dish-item:hover .dish-details {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .dish-details {
+        position: absolute;
+        z-index: 1000;
+        background: white;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+        width: 300px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+{% endblock %}
